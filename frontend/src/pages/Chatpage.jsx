@@ -6,8 +6,7 @@ import useAudioRecorder from "../hooks/useAudioRecorder";
 import record from "../assets/record.png";
 import copy from "../assets/copy.png";
 import share from "../assets/share.png";
-import { useLocation } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 export default function Chatpage() {
   const [inputText, setInputText] = useState("");
@@ -24,8 +23,13 @@ export default function Chatpage() {
     name: "",
     explanation: "",
   };
-  const { styleId } = useParams();
-  console.log("styleId: ", styleId);
+  const params = useParams();
+  console.log("params:", params);
+  const styleId = params.styleId;
+
+  console.log("URL params styleId:", styleId);
+  console.log("Current URL:", window.location.pathname);
+  console.log("Location state:", location);
 
   // AI 응답 메시지 목록 (mock data - 3개씩 그룹화)
   const aiResponseGroups = [
@@ -77,20 +81,39 @@ export default function Chatpage() {
           content: inputText,
         },
       ]);
+      console.log("post 요청 보내기");
 
       try {
-        const response = await fetch(`/api/text/1`, {
-          // URL 수정
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            content: inputText, // toneId는 URL에 포함되므로 body에서 제거
-          }),
+        const queryParams = new URLSearchParams({
+          requestText: inputText.trim(),
         });
 
+        console.log(
+          "Sending request to:",
+          `/api/text/${styleId}?${queryParams.toString()}`
+        );
+
+        const response = await fetch(
+          `/api/text/${styleId}?${queryParams.toString()}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Request failed:", {
+            url: `/api/text/${styleId}`,
+            queryParams: queryParams.toString(),
+          });
+          throw new Error(errorData.detail || "서버 에러가 발생했습니다.");
+        }
+
         const data = await response.json();
+        console.log("Server response:", data); // 서버 응답 확인
 
         if (data.isSuccess) {
           // setMessages((prev) => [
@@ -138,7 +161,16 @@ export default function Chatpage() {
           console.error("API 오류:", data.message);
         }
       } catch (error) {
-        console.error("API 호출 실패:", error);
+        console.error("API 호출 중 에러:", error);
+        // 사용자에게 에러 메시지 표시
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            type: "error",
+            content: "메시지 전송 중 오류가 발생했습니다.",
+          },
+        ]);
       }
 
       setInputText("");
