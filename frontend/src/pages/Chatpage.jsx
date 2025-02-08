@@ -71,6 +71,104 @@ export default function Chatpage() {
           ),
         },
       ]);
+
+      try {
+        // 파일 정보 확인
+        console.log("파일 타입:", audioFile.type);
+        console.log("파일 크기:", audioFile.size);
+        console.log("파일 이름:", audioFile.name);
+
+        const formData = new FormData();
+        formData.append("audioFile", audioFile);
+
+        // FormData 내용 확인
+        for (let pair of formData.entries()) {
+          console.log("FormData 항목:", pair[0], pair[1]);
+          console.log("FormData 파일 타입:", pair[1].type);
+        }
+
+        const sttResponse = await fetch(`/stt/${styleId}`, {
+          method: "POST",
+          body: formData,
+        });
+
+        // 응답 상태 확인
+        console.log("STT 응답 상태:", sttResponse.status);
+
+        if (!sttResponse.ok) {
+          const errorText = await sttResponse.text();
+          console.error("STT 서버 에러:", errorText);
+          throw new Error("음성 변환 중 오류가 발생했습니다.");
+        }
+
+        const sttData = await sttResponse.json();
+        console.log("STT 응답 데이터:", sttData);
+
+        // STT 결과로 스타일 변환 API 호출
+        const styleResponse = await fetch(`/api/text/${styleId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            requestText: sttData.text, // STT로 변환된 텍스트
+          }),
+        });
+
+        if (!styleResponse.ok) {
+          throw new Error("스타일 변환 중 오류가 발생했습니다.");
+        }
+
+        const styleData = await styleResponse.json();
+        console.log("스타일 변환 응답:", styleData);
+
+        if (styleData.isSuccess) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now(),
+              type: "ai",
+              content: (
+                <div className="space-y-2">
+                  {styleData.result.map((response, index) => {
+                    const responseId = `${Date.now()}-${index}`;
+                    return (
+                      <div
+                        key={responseId}
+                        className="bg-white p-4 rounded-2xl flex flex-row justify-between"
+                      >
+                        <div>{response}</div>
+                        <div className="pl-4 flex flex-row gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => handleCopy(response)}
+                            className="hover:opacity-70"
+                          >
+                            <img src={copy} alt="copy" className="w-4" />
+                          </button>
+                          <button onClick={() => handleShare(response)}>
+                            <img src={share} alt="share" className="w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ),
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error("에러:", error);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            type: "error",
+            content: error.message || "오류가 발생했습니다.",
+          },
+        ]);
+      }
+
       setAudioFile(null);
     } else if (inputText.trim()) {
       // 텍스트 메시지 추가
@@ -268,6 +366,44 @@ export default function Chatpage() {
     setIsShareModalOpen(true);
   };
 
+  useEffect(() => {
+    // JavaScript 키로 초기화
+    if (!window.Kakao.isInitialized()) {
+      // 여기에 JavaScript 키를 넣어주세요
+      window.Kakao.init("78528ec46b2f53dc8791694c203bd9e3");
+    }
+  }, []);
+
+  const shareToKakao = () => {
+    console.log("카카오 공유 시작");
+    // 모바일 여부 체크
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+
+    if (isMobile) {
+      // 모바일에서는 기본 공유
+      window.Kakao.Share.sendDefault({
+        objectType: "text",
+        text: "용용이가 변환한 메시지입니다!",
+        link: {
+          mobileWebUrl: window.location.href,
+          webUrl: window.location.href,
+        },
+      });
+    } else {
+      // PC에서는 URL 복사
+      const textArea = document.createElement("textarea");
+      textArea.value = window.location.href;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      alert("링크가 복사되었습니다. 카카오톡에 붙여넣기 해주세요!");
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen w-full bg-white">
       <div className="flex flex-row justify-between items-center p-5 pb-3.5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]">
@@ -362,7 +498,8 @@ export default function Chatpage() {
               <button
                 className="w-full py-3 bg-bg-blue rounded-xl hover:opacity-90"
                 onClick={() => {
-                  // 첫 번째 공유 버튼 기능
+                  console.log("카카오 공유 버튼 클릭");
+                  shareToKakao();
                   setIsShareModalOpen(false);
                 }}
               >
