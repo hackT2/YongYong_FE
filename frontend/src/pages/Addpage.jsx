@@ -2,33 +2,54 @@ import header from "../assets/header.png";
 import check from "../assets/check.png";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import axios from 'axios';
 
 export default function Addpage() {
   const navigate = useNavigate();
-  const [styleName, setStyleName] = useState("");
-  const [situation, setSituation] = useState("");
+  const [styleName, setStyleName] = useState('');        // 말투 이름
+  const [explanation, setExplanation] = useState('');    // 한 줄 설명
+  const [example, setExample] = useState('');            // 예시
+  const [longExplanation, setLongExplanation] = useState(''); // 상황 설명
 
-  const handleSubmit = () => {
-    // 새로운 스타일 객체 생성
-    const newStyle = {
-      situation: situation,
-      name: styleName,
-    };
+  const handleSubmit = async () => {
+    try {
+      const requestData = {
+        name: styleName,           
+        explanation: explanation,    
+        example: example,          
+        longExplanation: longExplanation  
+      };
 
-    // localStorage에서 기존 스타일 가져오기
-    const existingStyles = JSON.parse(localStorage.getItem("styles") || "[]");
+      // URL을 상대 경로로 변경
+      const response = await axios.post('/tone', requestData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
-    // 새로운 스타일 추가
-    const updatedStyles = [...existingStyles, newStyle];
+      console.log('Server response:', response.data);
 
-    // localStorage에 저장
-    localStorage.setItem("styles", JSON.stringify(updatedStyles));
-
-    console.log("Saved style:", newStyle); // 디버깅용
-    console.log("All styles:", updatedStyles); // 디버깅용
-
-    navigate("/main");
-  };
+      const newStyle = {
+        situation: explanation,
+        name: styleName
+      };
+      
+      const existingStyles = JSON.parse(localStorage.getItem('styles') || '[]');
+      const updatedStyles = [...existingStyles, newStyle];
+      localStorage.setItem('styles', JSON.stringify(updatedStyles));
+      
+      navigate('/main');
+      
+    } catch (error) {
+      console.error('Error details:', error);
+      if (error.response) {
+        // 서버가 응답을 반환한 경우
+        console.log('Response data:', error.response.data);
+        console.log('Response status:', error.response.status);
+      }
+      alert('서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+};
 
   return (
     <div className="flex flex-col h-screen w-full justify-between bg-bg-blue">
@@ -55,17 +76,17 @@ export default function Addpage() {
               e.target.style.height = e.target.scrollHeight + "px";
             }}
           />
-          <div className="w-full h-[1px] bg-black flex-shrink-0 mt-1"></div>
+          <div className="w-[256px] h-[1px] bg-black flex-shrink-0 mt-1"></div>
         </div>
 
-        <div className="w-full mt-6 flex flex-col gap-[2px]">
+        <div className="w-full mt-[24px] flex flex-col gap-[2px]">
           <div className="text-[20px] text-black font-nanumbarunpen font-normal">
-            한 줄 소개
+            한 줄 설명
           </div>
           <textarea
-            value={situation}
-            onChange={(e) => setSituation(e.target.value)}
-            placeholder="예)싸움을 멈추고 싶을 땐"
+            value={explanation}
+            onChange={(e) => setExplanation(e.target.value)}
+            placeholder="한 줄로 설명해주세요"
             className="text-[16px] text-[#6F6F6F] font-nanumbarunpen font-normal mt-2 focus:outline-none resize-none overflow-hidden"
             rows="1"
             onInput={(e) => {
@@ -73,15 +94,17 @@ export default function Addpage() {
               e.target.style.height = e.target.scrollHeight + "px";
             }}
           />
-          <div className="w-full h-[1px] bg-black flex-shrink-0 mt-1"></div>
+          <div className="w-[256px] h-[1px] bg-black flex-shrink-0 mt-1"></div>
         </div>
 
-        <div className="w-full mt-6 flex flex-col gap-[2px]">
+        <div className="w-full mt-[24px] flex flex-col gap-[2px]">
           <div className="text-[20px] text-black font-nanumbarunpen font-normal">
             상황 설명
           </div>
           <textarea
-            placeholder="예)화가 나는 상황에서 귀엽거나 장난스러운 분위기를 만들고 싶을 때 사용하는 말투"
+            value={longExplanation}
+            onChange={(e) => setLongExplanation(e.target.value)}
+            placeholder="자세한 설명을 입력해주세요"
             className="text-[16px] text-[#6F6F6F] font-nanumbarunpen font-normal mt-2 focus:outline-none resize-none overflow-hidden w-64 whitespace-pre-wrap break-words"
             rows="2"
             onInput={(e) => {
@@ -89,15 +112,17 @@ export default function Addpage() {
               e.target.style.height = e.target.scrollHeight + "px";
             }}
           />
-          <div className="w-full h-[1px] bg-black flex-shrink-0 mt-1"></div>
+          <div className="w-[256px] h-[1px] bg-black flex-shrink-0 mt-1"></div>
         </div>
 
-        <div className="w-full mt-6 flex flex-col gap-[2px]">
+        <div className="w-full mt-[24px] flex flex-col gap-[2px]">
           <div className="text-[20px] text-black font-nanumbarunpen font-normal">
             말투 예시
           </div>
           <textarea
-            placeholder="너무 짜증나 -> 너무 짜증나용"
+            value={example}
+            onChange={(e) => setExample(e.target.value)}
+            placeholder="예시를 입력해주세요"
             className="text-[16px] text-[#6F6F6F] font-nanumbarunpen font-normal mt-2 focus:outline-none resize-none overflow-hidden"
             rows="1"
             onInput={(e) => {
@@ -105,7 +130,7 @@ export default function Addpage() {
               e.target.style.height = e.target.scrollHeight + "px";
             }}
           />
-          <div className="w-full h-[1px] bg-black flex-shrink-0 mt-1"></div>
+          <div className="w-[256px] h-[1px] bg-black flex-shrink-0 mt-1"></div>
         </div>
 
         <div className="absolute bottom-12 left-0 right-0 flex justify-center">
