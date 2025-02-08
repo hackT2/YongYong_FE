@@ -12,7 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/main" element={<Mainpage />} />
-          <Route path="/chat" element={<Chatpage />} />
+          <Route path="/chat/:styeId" element={<Chatpage />} />
           <Route path="/add" element={<Addpage />} />
         </Routes>
       </Router>
