@@ -7,5 +7,5 @@
 ```bash
 npm install
 npm start
-
+```
 단 localhost:3000 으로 실행하여야함
