@@ -6,6 +6,8 @@ import useAudioRecorder from "../hooks/useAudioRecorder";
 import record from "../assets/record.png";
 import copy from "../assets/copy.png";
 import share from "../assets/share.png";
+import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export default function Chatpage() {
   const [inputText, setInputText] = useState("");
@@ -17,6 +19,13 @@ export default function Chatpage() {
   const [copiedId, setCopiedId] = useState(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedText, setSelectedText] = useState("");
+  const location = useLocation();
+  const { name, explanation } = location.state || {
+    name: "",
+    explanation: "",
+  };
+  const { styleId } = useParams();
+  console.log("styleId: ", styleId);
 
   // AI 응답 메시지 목록 (mock data - 3개씩 그룹화)
   const aiResponseGroups = [
@@ -41,7 +50,7 @@ export default function Chatpage() {
     }
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (audioFile) {
       // 음성 메시지 추가
       setMessages([
@@ -68,6 +77,70 @@ export default function Chatpage() {
           content: inputText,
         },
       ]);
+
+      try {
+        const response = await fetch(`/api/text/1`, {
+          // URL 수정
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: inputText, // toneId는 URL에 포함되므로 body에서 제거
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.isSuccess) {
+          // setMessages((prev) => [
+          //   ...prev,
+          //   {
+          //     id: Date.now(),
+          //     type: "ai",
+          //     responses: data.result,
+          //   },
+          // ]);
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now(),
+              type: "ai",
+              content: (
+                <div className="space-y-2">
+                  {data.result.map((response, index) => {
+                    const responseId = `${Date.now()}-${index}`;
+                    return (
+                      <div
+                        key={responseId}
+                        className="bg-white p-4 rounded-2xl flex flex-row justify-between"
+                      >
+                        <div>{response}</div>
+                        <div className="pl-4 flex flex-row gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => handleCopy(response)}
+                            className="hover:opacity-70"
+                          >
+                            <img src={copy} alt="copy" className="w-4" />
+                          </button>
+                          <button onClick={() => handleShare(response)}>
+                            <img src={share} alt="share" className="w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ),
+            },
+          ]);
+        } else {
+          console.error("API 오류:", data.message);
+        }
+      } catch (error) {
+        console.error("API 호출 실패:", error);
+      }
+
       setInputText("");
       const textarea = document.querySelector("textarea");
       if (textarea) {
@@ -76,48 +149,48 @@ export default function Chatpage() {
     }
 
     // AI 응답 그룹 추가
-    setTimeout(() => {
-      const responses = getRandomAiResponseGroup();
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          type: "ai",
-          content: (
-            <div className="space-y-2">
-              {responses.map((response, index) => {
-                const responseId = `${Date.now()}-${index}`;
-                console.log(
-                  "현재 렌더링 중인 responseId:",
-                  responseId,
-                  "현재 copiedId:",
-                  copiedId
-                ); // 렌더링 시 비교 로그
-                return (
-                  <div
-                    key={responseId}
-                    className="bg-white p-4 rounded-2xl flex flex-row justify-between"
-                  >
-                    <div>{response}</div>
-                    <div className="pl-4 flex flex-row gap-2 flex-shrink-0">
-                      <button
-                        onClick={() => handleCopy(response)}
-                        className="hover:opacity-70"
-                      >
-                        <img src={copy} alt="copy" className="w-4" />
-                      </button>
-                      <button onClick={() => handleShare(response)}>
-                        <img src={share} alt="share" className="w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ),
-        },
-      ]);
-    }, 1000);
+    // setTimeout(() => {
+    //   const responses = getRandomAiResponseGroup();
+    //   setMessages((prev) => [
+    //     ...prev,
+    //     {
+    //       id: Date.now(),
+    //       type: "ai",
+    //       content: (
+    //         <div className="space-y-2">
+    //           {responses.map((response, index) => {
+    //             const responseId = `${Date.now()}-${index}`;
+    //             console.log(
+    //               "현재 렌더링 중인 responseId:",
+    //               responseId,
+    //               "현재 copiedId:",
+    //               copiedId
+    //             ); // 렌더링 시 비교 로그
+    //             return (
+    //               <div
+    //                 key={responseId}
+    //                 className="bg-white p-4 rounded-2xl flex flex-row justify-between"
+    //               >
+    //                 <div>{response}</div>
+    //                 <div className="pl-4 flex flex-row gap-2 flex-shrink-0">
+    //                   <button
+    //                     onClick={() => handleCopy(response)}
+    //                     className="hover:opacity-70"
+    //                   >
+    //                     <img src={copy} alt="copy" className="w-4" />
+    //                   </button>
+    //                   <button onClick={() => handleShare(response)}>
+    //                     <img src={share} alt="share" className="w-3.5" />
+    //                   </button>
+    //                 </div>
+    //               </div>
+    //             );
+    //           })}
+    //         </div>
+    //       ),
+    //     },
+    //   ]);
+    // }, 1000);
   };
   // 스크롤 최하단 함수
   const scrollToBottom = () => {
@@ -169,8 +242,8 @@ export default function Chatpage() {
           <img src={goback} alt="goback" className="h-6" />
         </button>
         <div className="flex flex-col justify-center items-center">
-          <h1 className="text-[14px]">싸움을 멈추고 싶을땐</h1>
-          <h1 className="text-[32px] font-yong">용용체</h1>
+          <h1 className="text-[14px]">{explanation}</h1>
+          <h1 className="text-[32px] font-yong">{name}</h1>
         </div>
         <img src={yongyong} alt="yongyong" className="w-12" />
       </div>
