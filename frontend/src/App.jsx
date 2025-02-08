@@ -7,7 +7,7 @@ import Addpage from "./pages/Addpage";
 
 function App() {
   return (
-    <main className="flex justify-center items-center h-screen w-screen">
+    <main className="flex justify-center items-center min-h-screen max-h-screen h-screen w-full">
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
