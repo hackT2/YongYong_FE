@@ -6,7 +6,7 @@ import useAudioRecorder from "../hooks/useAudioRecorder";
 import record from "../assets/record.png";
 import copy from "../assets/copy.png";
 import share from "../assets/share.png";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 
 export default function Chatpage() {
   const [inputText, setInputText] = useState("");
@@ -24,6 +24,7 @@ export default function Chatpage() {
     explanation: "",
   };
   const params = useParams();
+  const navigate = useNavigate();
   console.log("params:", params);
   const styleId = params.styleId;
 
@@ -270,7 +271,10 @@ export default function Chatpage() {
   return (
     <div className="flex flex-col h-screen w-full bg-white">
       <div className="flex flex-row justify-between items-center p-5 pb-3.5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]">
-        <button className="flex justify-center items-center h-10 w-10">
+        <button
+          onClick={() => navigate("/main")}
+          className="flex justify-center items-center h-10 w-10"
+        >
           <img src={goback} alt="goback" className="h-6" />
         </button>
         <div className="flex flex-col justify-center items-center">

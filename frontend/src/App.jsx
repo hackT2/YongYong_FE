@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Mainpage from "./pages/Mainpage";
 import Chatpage from "./pages/Chatpage";
 import Addpage from "./pages/Addpage";
+import KakaoCallback from "./pages/KakaoCallback";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/main" element={<Mainpage />} />
           <Route exact path="/chat/:styleId" element={<Chatpage />} />
           <Route path="/add" element={<Addpage />} />
+          <Route path="/callback" element={<KakaoCallback />} />
         </Routes>
       </Router>
     </main>
