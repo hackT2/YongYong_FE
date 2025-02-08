@@ -10,6 +10,7 @@ module.exports = {
       colors: {
         "bg-blue": "#D9EDFF",
         kakao: "#FEE500",
+        "bg-gray": "#EFEFF0",
       },
     },
   },
