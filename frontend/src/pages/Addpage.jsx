@@ -5,44 +5,42 @@ import { useState } from "react";
 
 export default function Addpage() {
   const navigate = useNavigate();
-  const [styleName, setStyleName] = useState('');
-  const [situation, setSituation] = useState('');
+  const [styleName, setStyleName] = useState("");
+  const [situation, setSituation] = useState("");
 
   const handleSubmit = () => {
     // 새로운 스타일 객체 생성
     const newStyle = {
       situation: situation,
-      name: styleName
+      name: styleName,
     };
-    
+
     // localStorage에서 기존 스타일 가져오기
-    const existingStyles = JSON.parse(localStorage.getItem('styles') || '[]');
-    
+    const existingStyles = JSON.parse(localStorage.getItem("styles") || "[]");
+
     // 새로운 스타일 추가
     const updatedStyles = [...existingStyles, newStyle];
-    
+
     // localStorage에 저장
-    localStorage.setItem('styles', JSON.stringify(updatedStyles));
-    
-    console.log('Saved style:', newStyle);  // 디버깅용
-    console.log('All styles:', updatedStyles);  // 디버깅용
-    
-    navigate('/main');
+    localStorage.setItem("styles", JSON.stringify(updatedStyles));
+
+    console.log("Saved style:", newStyle); // 디버깅용
+    console.log("All styles:", updatedStyles); // 디버깅용
+
+    navigate("/main");
   };
 
-    return (
-      <div className="flex flex-col h-screen w-full justify-between bg-bg-blue">
-        <div className="flex flex-col w-full items-start justify-center px-10 pt-10 pb-5 bg-bg-blue">
-          <img src={header} alt="header" className="w-full" />
+  return (
+    <div className="flex flex-col h-screen w-full justify-between bg-bg-blue">
+      <div className="flex flex-col w-full items-start justify-center px-10 pt-10 pb-5 bg-bg-blue">
+        <img src={header} alt="header" className="w-full" />
+      </div>
+      <div className="flex flex-col flex-1 justify-start items-center bg-white rounded-t-[40px] pt-30 pb-10 px-10 overflow-y-auto">
+        <div className="text-[20px] text-black font-medium mt-8">말투 추가</div>
+        <div className="text-[12px] text-[#6F6F6F] font-nanumbarunpen font-normal">
+          가이드를 참고해 입력해주세요
         </div>
-        <div className="flex flex-col flex-1 justify-start items-center bg-white rounded-t-[40px] pt-30 pb-10 px-10 overflow-y-auto">
-          <div className="text-[20px] text-black font-medium mt-8">
-            말투 추가
-          </div>
-          <div className="text-[12px] text-[#6F6F6F] font-nanumbarunpen font-normal">
-            가이드를 참고해 입력해주세요
-          </div>
-          <div className="w-full mt-6 flex flex-col gap-[2px]">
+        <div className="w-full mt-6 flex flex-col gap-[2px]">
           <div className="text-[20px] text-black font-nanumbarunpen font-normal">
             말투 이름
           </div>
@@ -57,10 +55,10 @@ export default function Addpage() {
               e.target.style.height = e.target.scrollHeight + "px";
             }}
           />
-          <div className="w-[256px] h-[1px] bg-black flex-shrink-0 mt-1"></div>
-          </div>
+          <div className="w-full h-[1px] bg-black flex-shrink-0 mt-1"></div>
+        </div>
 
-          <div className="w-full mt-6 flex flex-col gap-[2px]">
+        <div className="w-full mt-6 flex flex-col gap-[2px]">
           <div className="text-[20px] text-black font-nanumbarunpen font-normal">
             한 줄 소개
           </div>
@@ -75,10 +73,10 @@ export default function Addpage() {
               e.target.style.height = e.target.scrollHeight + "px";
             }}
           />
-          <div className="w-[256px] h-[1px] bg-black flex-shrink-0 mt-1"></div>
-          </div>
+          <div className="w-full h-[1px] bg-black flex-shrink-0 mt-1"></div>
+        </div>
 
-          <div className="w-full mt-6 flex flex-col gap-[2px]">
+        <div className="w-full mt-6 flex flex-col gap-[2px]">
           <div className="text-[20px] text-black font-nanumbarunpen font-normal">
             상황 설명
           </div>
@@ -91,10 +89,10 @@ export default function Addpage() {
               e.target.style.height = e.target.scrollHeight + "px";
             }}
           />
-          <div className="w-[256px] h-[1px] bg-black flex-shrink-0 mt-1"></div>
-          </div>
+          <div className="w-full h-[1px] bg-black flex-shrink-0 mt-1"></div>
+        </div>
 
-          <div className="w-full mt-6 flex flex-col gap-[2px]">
+        <div className="w-full mt-6 flex flex-col gap-[2px]">
           <div className="text-[20px] text-black font-nanumbarunpen font-normal">
             말투 예시
           </div>
@@ -107,21 +105,19 @@ export default function Addpage() {
               e.target.style.height = e.target.scrollHeight + "px";
             }}
           />
-          <div className="w-[256px] h-[1px] bg-black flex-shrink-0 mt-1"></div>
-          </div>
+          <div className="w-full h-[1px] bg-black flex-shrink-0 mt-1"></div>
+        </div>
 
-          
-          
-          <div className="absolute bottom-12 left-0 right-0 flex justify-center">
-            <button 
+        <div className="absolute bottom-12 left-0 right-0 flex justify-center">
+          <button
             onClick={handleSubmit}
             className="bg-[#44A4F9] text-white px-[24px] py-2 w-[228px] h-[76px] flex-shrink-0 rounded-lg flex justify-between items-center"
-            >
-              <span>나만의 말투 만들기</span>
-              <img src={check} alt="add" className="w-[24px] h-[24px]" />
-            </button>
-          </div>
+          >
+            <span>나만의 말투 만들기</span>
+            <img src={check} alt="add" className="w-[24px] h-[24px]" />
+          </button>
         </div>
       </div>
-    );
+    </div>
+  );
 }
