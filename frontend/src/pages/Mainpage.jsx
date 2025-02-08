@@ -1,13 +1,135 @@
+import {useEffect, useState} from "react";
 import header from "../assets/header.png";
+import add from "../assets/add.png";
+import user from "../assets/user.png";
+import { useNavigate } from "react-router-dom";
 
 export default function Mainpage() {
+  const navigate = useNavigate();
+  const defaultStyles = [
+    {
+      situation: "싸움을 멈추고 싶을땐",
+      name: "용용체"
+    },
+    {
+      situation: "교수님께 메일을 작성할땐",
+      name: "메일체"
+    },
+    {
+      situation: "따뜻한 말 한마디가 필요할땐",
+      name: "위로체"
+    },
+    {
+      situation: "공지용 말투가 필요할 땐",
+      name: "공지체"
+    }
+  ];
+
+  const [styles, setStyles] = useState(defaultStyles);
+
+  useEffect(() => {
+    const savedStyles = JSON.parse(localStorage.getItem('styles') || '[]');
+    if (savedStyles.length > 0) {
+      setStyles(prev => [...prev, ...savedStyles]);
+    }
+  }, []);
+
+  const handleDelete = (index) => {
+    // 기본 스타일은 삭제할 수 없음
+    if (index < defaultStyles.length) return;
+
+    // 새로운 스타일 배열 생성 (삭제할 항목 제외)
+    const updatedStyles = styles.filter((_, i) => i !== index);
+    
+    // 로컬 스토리지 업데이트 (기본 스타일 제외한 나머지만 저장)
+    const customStyles = updatedStyles.slice(defaultStyles.length);
+    localStorage.setItem('styles', JSON.stringify(customStyles));
+    
+    // 상태 업데이트
+    setStyles(updatedStyles);
+  };
+
   return (
     <div className="flex flex-col h-screen w-full justify-between bg-bg-blue">
       <div className="flex flex-col w-full items-start justify-center px-10 pt-10 pb-5 bg-bg-blue">
         <img src={header} alt="header" className="w-full" />
       </div>
-      <div className="flex flex-col flex-1 justify-center items-center bg-white rounded-t-[40px] pt-5 pb-10 px-10 overflow-y-auto">
-        바디
+      <div className="flex flex-col flex-1 justify-start items-center bg-white rounded-t-[40px] pt-8 pb-10 px-10 overflow-y-auto">
+        <div className="flex flex-col gap-[20px]">
+        {styles.map((style, index) => (
+            <div className="relative">
+            <button 
+              key={index}
+              className="w-[284px] h-[84.071px] flex-shrink-0 bg-white rounded-[80px] shadow-[0px_0px_5.5px_rgba(0,0,0,0.25)] hover:shadow-[0px_0px_8px_rgba(0,0,0,0.3)] transition-shadow"
+            >
+              <div className="flex flex-col justify-center items-center">
+                <h1 className="text-[16px] mt-2">{style.situation}</h1>
+                <h1 className="text-[32px] font-yong">{style.name}</h1>
+              </div>
+            </button>
+            {index >= defaultStyles.length && (
+              <button
+                onClick={() => handleDelete(index)}
+                className="absolute -right-2 -top-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        ))}
+        
+
+          {/* <button 
+            className="w-[284px] h-[84.071px] flex-shrink-0 bg-white rounded-[80px] shadow-[0px_0px_5.5px_rgba(0,0,0,0.25)] hover:shadow-[0px_0px_8px_rgba(0,0,0,0.3)] transition-shadow"
+            onClick={() => {
+              // 여기에 버튼 클릭 시 실행할 함수를 추가하세요
+            }}
+          >
+            <div className="flex flex-col justify-center items-center">
+              <h1 className="text-[16px] mt-2">교수님께 메일을 작성할땐</h1>
+              <h1 className="text-[32px] font-yong">메일체</h1>
+            </div>
+          </button>
+
+          <button 
+            className="w-[284px] h-[84.071px] flex-shrink-0 bg-white rounded-[80px] shadow-[0px_0px_5.5px_rgba(0,0,0,0.25)] hover:shadow-[0px_0px_8px_rgba(0,0,0,0.3)] transition-shadow"
+            onClick={() => {
+              // 여기에 버튼 클릭 시 실행할 함수를 추가하세요
+            }}
+          >
+            <div className="flex flex-col justify-center items-center">
+              <h1 className="text-[16px] mt-2">따뜻한 말 한마디가 필요할땐</h1>
+              <h1 className="text-[32px] font-yong">위로체</h1>
+            </div>
+          </button>
+
+          <button 
+            className="w-[284px] h-[84.071px] flex-shrink-0 bg-white rounded-[80px] shadow-[0px_0px_5.5px_rgba(0,0,0,0.25)] hover:shadow-[0px_0px_8px_rgba(0,0,0,0.3)] transition-shadow"
+            onClick={() => {
+              // 여기에 버튼 클릭 시 실행할 함수를 추가하세요
+            }}
+          >
+            <div className="flex flex-col justify-center items-center">
+              <h1 className="text-[16px] mt-2">공지용 말투가 필요할 땐</h1>
+              <h1 className="text-[32px] font-yong">공지체</h1>
+            </div>
+          </button>*/}
+        </div> 
+
+        <div className="w-full flex justify-end items-center gap-[20px] fixed bottom-20 right-10">
+          <button className="w-[46px] h-[76px] flex-shrink-0 bg-[#D8D8D8] rounded-[36px] flex items-center justify-center">
+            <img src={user} alt="user" className="w-[24px] h-[24px]" />
+          </button>
+          <button
+            className="w-[228px] h-[76px] flex-shrink-0 bg-[#44A4F9] rounded-[40px] text-white flex justify-between items-center px-[24px]" 
+            onClick={() => navigate('/add')}>
+            <div className="flex flex-col">
+              <span className="text-[16px] font-pretendard">원하는 말투가 없나요?</span>
+              <span className="text-[10px] font-pretendard">상황에 맞는 말투를 만들 수 있어요!</span>
+            </div>
+            <img src={add} alt="add" className="w-[24px] h-[24px]" />
+          </button>
+        </div>
       </div>
     </div>
   );
